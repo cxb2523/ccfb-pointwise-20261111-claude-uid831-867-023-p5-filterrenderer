@@ -1,0 +1,32 @@
+{
+  "name": "@davepagurek/p5.filterrenderer",
+  "version": "0.0.18",
+  "main": "p5.filterRenderer.min.js",
+  "author": "Dave Pagurek <dave@davepagurek.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davepagurek/p5.filterRenderer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davepagurek/p5.filterRenderer/issues"
+  },
+  "homepage": "https://github.com/davepagurek/p5.filterRenderer",
+  "devDependencies": {
+    "minify": "^9.0.0",
+    "prettier": "^2.7.1"
+  },
+  "scripts": {
+    "build:all": "minify Renderer.js > p5.filterRenderer.min.js; minify BlurRenderer.js >> p5.filterRenderer.min.js; minify GaussianBlurRenderer.js >> p5.filterRenderer.min.js; minify ContactShadowRenderer.js >> p5.filterRenderer.min.js",
+    "build": "yarn build:all",
+    "publish": "npm publish --access public"
+  },
+  "files": [
+    "p5.filterRenderer.min.js",
+    "Renderer.js",
+    "BlurRenderer.js",
+    "GaussianBlurRenderer.js",
+    "ContactShadowRenderer.js"
+  ],
+  "packageManager": "yarn@4.4.1+sha512.f825273d0689cc9ead3259c14998037662f1dcd06912637b21a450e8da7cfeb4b1965bbee73d16927baa1201054126bc385c6f43ff4aa705c8631d26e12460f1"
+}
