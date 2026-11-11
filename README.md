@@ -38,7 +38,11 @@ Create a blur renderer and draw inside its `draw` callback. When you tell it to 
 
 #### Gaussian blur
 
-This is likely the best-looking blur renderer, although it uses two render passes. Start by using this one, but look out the other `BlurRenderer` if it's slow.
+This is likely the best-looking blur renderer. It runs a configurable
+separable Gaussian: a horizontal pass and a vertical pass connected by
+ping-pong framebuffers, with the 1D weights and offsets generated on the CPU
+from the current sigma and uploaded as uniforms (no fixed-length kernel is
+baked into the shader).
 
 <table>
 <tr>
@@ -49,10 +53,8 @@ let blurRenderer
 
 function setup() {
   createCanvas(400, 400, WEBGL)
-  blurRenderer = createGaussianBlurRenderer()
-  blurRenderer.setIntensity(0.15)
-  blurRenderer.setSamples(20)
-  blurRenderer.setDof(50)
+  // radius and sigma can be set here or changed later with the setters
+  blurRenderer = createGaussianBlurRenderer({ radius: 20, sigma: 6 })
 }
 
 function draw() {
@@ -66,7 +68,6 @@ function draw() {
     push()
     fill('blue')
     translate(-80, -80, -300)
-    blurRenderer.focusHere()
     sphere(50)
     pop()
 
@@ -89,20 +90,23 @@ function draw() {
 Methods on `GaussianBlurRenderer`:
 - `GaussianBlurRenderer.prototype.draw(callback: () => void)`
   - Draw the scene defined in the callback with blur
-- `GaussianBlurRenderer.prototype.focusHere()`
-  - Tell the renderer what point in space should be in focus. It will move based on any calls to `translate()` or other transformations that you have applied.
-  - Defaults to the origin
-- `GaussianBlurRenderer.prototype.setIntensity(intensity: number)`
-  - Control the intensity of the blur, between 0 and 1: the lower the intensity, the farther objects have to be from the focal point to be blurred
-  - Defaults to 0.1
-- `GaussianBlurRenderer.prototype.setDof(dof: number)`
-  - Control the depth of field (dof), which is the distance away from the focal point that is also in focus, from 0 up
-  - The lower the dof, the smaller range will be that has no blur. Blur amount will start to accumulate when objects are outside of the dof range
-  - The focal target (set by `focusHere`) is located in the centre of the clear range. So assume the focal target's depth value is `z`, then the clear range becomes from `z - dof / 2` to `z + dof / 2`.
-  - Defaults to 0
-- `GaussianBlurRenderer.prototype.setSamples(numSamples: number)`
-  - Control how many random samples to use in the blur shader. More samples will look smoother but is more computationally intensive.
-  - Defaults to 20
+- `GaussianBlurRenderer.prototype.setRadius(radius: number)`
+  - Kernel half-width in pixels, clamped to the hard cap of 64 (129 taps per
+    pass). A radius of 0 skips both blur passes entirely and draws the scene
+    straight through, so no intermediate render targets are used
+  - Defaults to 10
+- `GaussianBlurRenderer.prototype.setSigma(sigma: number)`
+  - Standard deviation of the Gaussian in pixels. Non-positive, non-finite, or
+    sub-minimum values fall back to a radius-derived sigma (one third of the
+    radius, with a minimum of 0.5) so weight normalization can never divide by
+    zero
+  - Defaults to the radius-derived fallback
+- `GaussianBlurRenderer.prototype.getIntermediateFormatName()`
+  - Returns `'FLOAT'` or `'UNSIGNED_BYTE'`, reporting which precision path the
+    ping-pong textures use. Float is preferred to avoid banding across the two
+    passes; when float rendering is unavailable (WebGL1 without the float
+    extensions, or an incomplete float framebuffer), it falls back to unsigned
+    byte, which quantizes each pass to 8 bits per channel
 
 A live example: https://davepagurek.github.io/p5.Framebuffer/examples/gaussianblur
 

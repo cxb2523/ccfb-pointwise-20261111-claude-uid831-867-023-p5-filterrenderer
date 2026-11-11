@@ -1,7 +1,27 @@
 html, body {
   margin: 0;
-  padding: 0;
+  padding: 8px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
 }
 canvas {
   display: block;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.slider-row span:first-child {
+  min-width: 160px;
+}
+.slider-row span:last-child {
+  min-width: 48px;
+  font-variant-numeric: tabular-nums;
+}
+.status {
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  color: #444;
 }
